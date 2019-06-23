@@ -19,7 +19,6 @@ namespace OrleansDemo.SiloHost
             var devEnvironmentVariable = Environment.GetEnvironmentVariable("NETCORE_ENVIRONMENT");
             var isDevelopment = string.IsNullOrEmpty(devEnvironmentVariable) || devEnvironmentVariable.ToLower() == "development";
             var builder = new ConfigurationBuilder();
-            //builder.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
             if (isDevelopment) 
             {
                 builder.AddUserSecrets<Program>();
@@ -66,14 +65,7 @@ namespace OrleansDemo.SiloHost
                     options.ConnectionString = Configuration["Orleans:GrainStorage"];
                     options.UseJsonFormat = true;
                 })
-                .Configure<EndpointOptions>(options =>
-                {
-                    options.SiloPort = 11111 + portAdd;
-                    // Port to use for the gateway
-                    options.GatewayPort = 30000 + portAdd;
-                    // IP Address to advertise in the cluster
-                    options.AdvertisedIPAddress = IPAddress.Loopback;
-                })
+                .ConfigureEndpoints(siloPort: 11111 + portAdd, gatewayPort: 30000 + portAdd)
                 .ConfigureApplicationParts(parts => parts.AddFromApplicationBaseDirectory())
                 .UseDashboard(_ => {  })
                 .UseLinuxEnvironmentStatistics()

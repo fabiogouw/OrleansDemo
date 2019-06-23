@@ -61,7 +61,7 @@ namespace OrleansDemo.WebApp
 
         private IClusterClient CreateClusterClient(IServiceProvider serviceProvider)
         {
-            var client = new ClientBuilder()
+            IClusterClient client = new ClientBuilder()
                 .Configure<ClusterOptions>(options =>
                 {
                     options.ClusterId = "dev";
@@ -72,7 +72,7 @@ namespace OrleansDemo.WebApp
                     options.Invariant = "System.Data.SqlClient";
                     options.ConnectionString = Configuration["Orleans:ClusterStorage"];
                 })                
-                .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(IDevice).Assembly).WithReferences())
+                //.ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(IDevice).Assembly).WithReferences())
                 .ConfigureLogging(_ => _.AddConsole())
                 .Build();
            
