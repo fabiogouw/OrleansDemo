@@ -19,7 +19,7 @@ namespace OrleansDemo.WebApp.Controllers
             _client = client;
         }
 
-        // GET api/values/5
+        // GET api/device/5
         [HttpGet("{deviceId}")]
         public async Task<double> Get(int deviceId)
         {
@@ -27,7 +27,7 @@ namespace OrleansDemo.WebApp.Controllers
             return await device.GetTemperature();
         }
 
-        // PUT api/values/5
+        // PUT api/device/5
         [HttpPut("{deviceId}")]
         public async Task Put(int deviceId, [FromForm] string value)
         {

@@ -8,72 +8,40 @@ using Orleans;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Statistics;
+using Microsoft.Extensions.Hosting;
+using System.IO;
 
 namespace OrleansDemo.SiloHost
 {
     class Program
     {
-        public static IConfigurationRoot Configuration { get; set; }
-        public static int Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            var devEnvironmentVariable = Environment.GetEnvironmentVariable("NETCORE_ENVIRONMENT");
-            var isDevelopment = string.IsNullOrEmpty(devEnvironmentVariable) || devEnvironmentVariable.ToLower() == "development";
-            var builder = new ConfigurationBuilder();
-            if (isDevelopment) 
-            {
-                builder.AddUserSecrets<Program>();
-            }
-            Configuration = builder.Build();
-            return RunMainAsync(args.Length > 0 ? Convert.ToInt32(args[0]) : 0).Result;
-        }
-
-        private static async Task<int> RunMainAsync(int portAdd)
-        {
-            try
-            {
-                var host = await StartSilo(portAdd);
-                Console.WriteLine("Press Enter to terminate...");
-                Console.ReadLine();
-
-                await host.StopAsync();
-
-                return 0;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                return 1;
-            }
-        }
-
-        private static async Task<ISiloHost> StartSilo(int portAdd)
-        {
-            var builder = new SiloHostBuilder()
-                .Configure<ClusterOptions>(options =>
+            IHost host = new HostBuilder()
+                 .ConfigureHostConfiguration(configHost =>
+                 {
+                     configHost.SetBasePath(Directory.GetCurrentDirectory());
+                     configHost.AddCommandLine(args);
+                 })
+                 .ConfigureAppConfiguration((hostContext, configApp) =>
+                 {
+                     configApp.SetBasePath(Directory.GetCurrentDirectory());
+                     configApp.AddJsonFile($"appsettings.json", true);
+                     configApp.AddJsonFile($"appsettings.{hostContext.HostingEnvironment.EnvironmentName}.json", true);
+                     configApp.AddUserSecrets<Program>();
+                     configApp.AddCommandLine(args);
+                 })
+                .ConfigureServices((hostContext, services) =>
                 {
-                    options.ClusterId = "dev";
-                    options.ServiceId = "OrleansDemo";
+                    services.AddLogging();
+                    services.AddHostedService<SiloHostService>();
                 })
-                .UseAdoNetClustering(options =>
+                .ConfigureLogging((hostContext, configLogging) =>
                 {
-                    options.Invariant = "System.Data.SqlClient";
-                    options.ConnectionString = Configuration["Orleans:ClusterStorage"];
+                    configLogging.AddConsole();
                 })
-                .AddAdoNetGrainStorage("Devices", options=>
-                {
-                    options.Invariant = "System.Data.SqlClient";
-                    options.ConnectionString = Configuration["Orleans:GrainStorage"];
-                    options.UseJsonFormat = true;
-                })
-                .ConfigureEndpoints(siloPort: 11111 + portAdd, gatewayPort: 30000 + portAdd)
-                .ConfigureApplicationParts(parts => parts.AddFromApplicationBaseDirectory())
-                .UseDashboard(_ => {  })
-                .UseLinuxEnvironmentStatistics()
-                .ConfigureLogging(logging => logging.AddConsole());
-
-            var host = builder.Build();
-            await host.StartAsync();
-            return host;
+                .Build();
+            await host.RunAsync();
         }
     }
 }
