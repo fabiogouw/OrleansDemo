@@ -20,6 +20,7 @@ namespace OrleansDemo.WebApp
     public class Startup
     {
         private readonly ILogger<Startup> _logger;
+        private IClusterClient _client;
         public IConfiguration Configuration { get; }
 
         public Startup(ILogger<Startup> logger, Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
@@ -44,8 +45,9 @@ namespace OrleansDemo.WebApp
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IHostingEnvironment env, IApplicationLifetime applicationLifetime)
         {
+            applicationLifetime.ApplicationStopping.Register(OnShutdown);
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -55,13 +57,12 @@ namespace OrleansDemo.WebApp
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-            app.UseHttpsRedirection();
             app.UseMvc();
         }
 
         private IClusterClient CreateClusterClient(IServiceProvider serviceProvider)
         {
-            IClusterClient client = new ClientBuilder()
+            _client = new ClientBuilder()
                 .Configure<ClusterOptions>(options =>
                 {
                     options.ClusterId = "dev";
@@ -70,14 +71,13 @@ namespace OrleansDemo.WebApp
                 .UseAdoNetClustering(options =>
                 {
                     options.Invariant = "System.Data.SqlClient";
-                    options.ConnectionString = Configuration["Orleans:ClusterStorage"];
+                    options.ConnectionString = Configuration.GetConnectionString("ClusterStorage");
                 })                
-                //.ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(IDevice).Assembly).WithReferences())
                 .ConfigureLogging(_ => _.AddConsole())
                 .Build();
            
-            StartClientWithRetries(client).Wait();
-            return client;
+            StartClientWithRetries(_client).Wait();
+            return _client;
         }
 
         private async Task StartClientWithRetries(IClusterClient client)
@@ -95,6 +95,16 @@ namespace OrleansDemo.WebApp
                 }
                 await Task.Delay(TimeSpan.FromSeconds(2));
             }
-        }        
+        }
+
+        private void OnShutdown()
+        {
+            if(_client != null)
+            {
+                _logger.LogInformation("Closing Orleans client...");
+                _client.Close();
+                _logger.LogInformation("Orleans client closed.");
+            }
+        }
     }
 }
