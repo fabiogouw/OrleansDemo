@@ -70,6 +70,11 @@ namespace OrleansDemo.SiloHost
                     options.ClusterId = "dev";
                     options.ServiceId = "OrleansDemo";
                 })
+                .Configure<GrainCollectionOptions>(options =>
+                {
+                    options.CollectionAge = TimeSpan.FromMinutes(3);
+                    options.CollectionQuantum = TimeSpan.FromMinutes(2);
+                })
                 .UseAdoNetClustering(options =>
                 {
                     options.Invariant = "System.Data.SqlClient";
@@ -83,7 +88,7 @@ namespace OrleansDemo.SiloHost
                 })
                 .ConfigureEndpoints(siloPort: 11111 + portAdd, gatewayPort: 30000 + portAdd)
                 .ConfigureApplicationParts(parts => parts.AddFromApplicationBaseDirectory())
-                .UseDashboard(_ => { })
+                .UseDashboard(options => options.Port = 8080 + portAdd)
                 .UseLinuxEnvironmentStatistics()
                 .ConfigureLogging(logging => logging.AddConsole());
 
