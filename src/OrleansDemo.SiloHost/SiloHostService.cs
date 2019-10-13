@@ -97,9 +97,14 @@ namespace OrleansDemo.SiloHost
             _logger.LogInformation("Host started.");
         }
 
-        public async Task StopAsync(CancellationToken cancellationToken)
+        public Task StopAsync(CancellationToken cancellationToken)
         {
-
+            _logger.LogInformation("Host stopping...");
+            if(_host != null)
+            {
+                _host.StopAsync(cancellationToken);
+            }
+            return Task.CompletedTask;
         }
     }
 }

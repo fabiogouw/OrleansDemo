@@ -8,7 +8,7 @@ using OrleansDemo.Contracts;
 
 namespace OrleansDemo.WebApp.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/devices")]
     [ApiController]
     public class DeviceController : ControllerBase
     {
@@ -19,7 +19,7 @@ namespace OrleansDemo.WebApp.Controllers
             _client = client;
         }
 
-        // GET api/device/5
+        // GET api/devices/5
         [HttpGet("{deviceId}")]
         public async Task<double> Get(int deviceId)
         {
@@ -27,7 +27,7 @@ namespace OrleansDemo.WebApp.Controllers
             return await device.GetTemperature();
         }
 
-        // PUT api/device/5
+        // PUT api/devices/5
         [HttpPut("{deviceId}")]
         public async Task Put(int deviceId, [FromForm] string value)
         {
