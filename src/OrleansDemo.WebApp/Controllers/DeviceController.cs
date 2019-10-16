@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Orleans;
 using OrleansDemo.Contracts;
@@ -21,18 +22,34 @@ namespace OrleansDemo.WebApp.Controllers
 
         // GET api/devices/5
         [HttpGet("{deviceId}")]
-        public async Task<double> Get(int deviceId)
+        public async Task<IActionResult> Get(int deviceId)
         {
-            var device = _client.GetGrain<IDevice>(deviceId);
-            return await device.GetTemperature();
+            try 
+            {
+                var device = _client.GetGrain<IDevice>(deviceId);
+                double temperature = await device.GetTemperature();
+                return Ok(temperature);
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
         }
 
         // PUT api/devices/5
         [HttpPut("{deviceId}")]
-        public async Task Put(int deviceId, [FromForm] string value)
+        public async Task<IActionResult> Put(int deviceId, [FromForm] string value)
         {
-            var device = _client.GetGrain<IDevice>(deviceId);
-            await device.SetTemperature(double.Parse(value));
+            try
+            {
+                var device = _client.GetGrain<IDevice>(deviceId);
+                await device.SetTemperature(double.Parse(value));
+                return Ok();
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
         }
     }
 }

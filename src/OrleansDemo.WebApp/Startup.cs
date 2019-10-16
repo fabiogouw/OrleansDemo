@@ -87,6 +87,7 @@ namespace OrleansDemo.WebApp
                 try
                 {
                     await client.Connect();
+                    _logger.LogInformation("Connected to the Orleans' cluster.");
                     return;
                 }
                 catch (Exception ex)
