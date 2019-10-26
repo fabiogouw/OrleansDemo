@@ -1,10 +1,18 @@
 # Orleans Demo
 
-Este È um exemplo de uso do framework Orleans da Microsoft para a construÁ„o de aplicaÁıes escal·veis e resilientes.
-A ideia aqui È simular um sistema que gerencia dispositivos que medem a temperatura (IoT). Cada um dos dispositivos envia para uma API a sua temperatura atual, que È armazenada nos atores (grains) hospedados na camada intermedi·ria (stateful).
+Este √© um exemplo de uso do framework Orleans da Microsoft para a constru√ß√£o de aplica√ß√µes escal√°veis e resilientes.
+A ideia aqui √© simular um sistema que gerencia dispositivos que medem a temperatura (IoT). Cada um dos dispositivos envia para uma API a sua temperatura atual, que √© armazenada nos atores (grains) hospedados na camada intermedi√°ria (stateful).
 
 ![Alt text](docs/architecture.png)
 
-Este exemplo considera a persistÍncia dos atores e a gest„o do cluster com o uso de um banco de dados SQL Server. A URL de conex„o deve ser configurada como um secret da aplicaÁ„o (chaves *ClusterStorage* e *GrainStorage*)
+Este exemplo considera a persist√™ncia dos atores e a gest√£o do cluster com o uso de um banco de dados SQL Server. A URL de conex√£o deve ser configurada como um secret da aplica√ß√£o (chaves *ClusterStorage* e *GrainStorage*)
 
-O exemplo foi desenvolvido em uma m·quina Ubuntu, com .NET Core 2.2 e rodando um SQL Server 2019 como um container (Docker).
+```bash
+dotnet user-secrets set "ConnectionStrings:GrainStorage" "Server=172.17.0.2;Database=orleans;User Id=sa;Password=ABC;"
+
+dotnet user-secrets set "ConnectionStrings:ClusterStorage" "Server=172.17.0.2;Database=orleans;User Id=sa;Password=ABC;"
+```
+
+O exemplo foi desenvolvido em uma m√°quina Ubuntu, com .NET Core 3.0 e rodando um SQL Server 2017 como um container (Docker).
+
+Obs. Os scripts para a cria√ß√£o das tabelas de storage em bases relacionais hoje se encontram na pasta de packages do nuget (~/.nuget/packages/microsoft.orleans.persistence.adonet/3.0.0-beta1/lib/netstandard2.0 e ~/.nuget/packages/microsoft.orleans.clustering.adonet/3.0.0-beta1/lib/netstandard2.0). H√° uma discuss√£o pendente de onde melhor ficariam esses scripts, j√° que anteriormente eles eram instalados junto da solu√ß√£o na hora de baixar os respectivos pacotes Nuget.

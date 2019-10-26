@@ -80,6 +80,7 @@ namespace OrleansDemo.SiloHost
                     options.Invariant = "System.Data.SqlClient";
                     options.ConnectionString = _config.GetConnectionString("ClusterStorage");
                 })
+                //.AddMemoryGrainStorage("Devices")
                 .AddAdoNetGrainStorage("Devices", options =>
                 {
                     options.Invariant = "System.Data.SqlClient";
