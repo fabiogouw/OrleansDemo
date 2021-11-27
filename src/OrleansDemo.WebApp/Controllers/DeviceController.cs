@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Orleans;
 using OrleansDemo.Contracts;
+using System;
+using System.Threading.Tasks;
 
 namespace OrleansDemo.WebApp.Controllers
 {
-    [Route("api/devices")]
     [ApiController]
+    [Route("api/devices")]
     public class DeviceController : ControllerBase
     {
         private readonly IClusterClient _client;

@@ -1,20 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Orleans;
 using Orleans.Configuration;
 using Orleans.Hosting;
-using OrleansDemo.Contracts;
+using System;
+using System.Threading.Tasks;
 
 namespace OrleansDemo.WebApp
 {
@@ -24,7 +19,7 @@ namespace OrleansDemo.WebApp
         private IClusterClient _client;
         public IConfiguration Configuration { get; }
 
-        public Startup(ILogger<Startup> logger, Microsoft.AspNetCore.Hosting.IWebHostEnvironment env)
+        public Startup(ILogger<Startup> logger, IWebHostEnvironment env)
         {
             _logger = logger;
             var builder = new ConfigurationBuilder()
@@ -42,12 +37,11 @@ namespace OrleansDemo.WebApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton(CreateClusterClient);
-            services.AddMvc(options => options.EnableEndpointRouting = false)
-                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IWebHostEnvironment env, IHostApplicationLifetime applicationLifetime)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime applicationLifetime)
         {
             applicationLifetime.ApplicationStopping.Register(OnShutdown);
             if (env.IsDevelopment())
@@ -56,10 +50,19 @@ namespace OrleansDemo.WebApp
             }
             else
             {
+                app.UseExceptionHandler("/Home/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-            app.UseMvc();
+
+            app.UseHttpsRedirection();
+
+            app.UseRouting();
+            
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
 
         private IClusterClient CreateClusterClient(IServiceProvider serviceProvider)
