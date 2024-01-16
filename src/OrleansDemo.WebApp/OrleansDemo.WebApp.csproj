@@ -9,7 +9,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
     <PackageReference Include="Microsoft.Orleans.Client" Version="3.6.0" />
     <PackageReference Include="Microsoft.Orleans.Clustering.AdoNet" Version="3.6.0" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
   </ItemGroup>
 
     <ItemGroup>
